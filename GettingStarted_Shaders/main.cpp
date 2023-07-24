@@ -111,20 +111,13 @@ unsigned int build_shader_program()
 	return shaderProgram;
 }
 
-std::tuple<std::array<unsigned int, 2>, std::array<unsigned int, 2>, std::array<unsigned int, 2>> get_VAO_VBO_EBO()
+std::tuple<unsigned int, unsigned int, unsigned int> get_VAO_VBO_EBO()
 {
-	float quadrangle[] = {
+	float vertices[] = {
 		 -0.5f, -0.5f, 0.0f,
 		0.5f, -0.5f, 0.0f,
 		-0.45f, 0.5f, 0.0f,
 		 0.45f, 0.5f, 0.0f
-	};
-
-	float rectangle[] = {
-		0.5f, -0.8f, 0.0f,
-		0.7f, 0.5f, 0.0f,
-		1.1f, -0.5f, 0.0f,
-		1.0f, 0.5f, 0.0f
 	};
 
 	unsigned int indices[] = {
@@ -132,47 +125,36 @@ std::tuple<std::array<unsigned int, 2>, std::array<unsigned int, 2>, std::array<
 		1,2,3
 	};
 
-	std::array<unsigned int, 2> VBOs {0u, 0u}, VAOs{ 0u,0u }, EBOs{ 0u, 0u };
+	unsigned int VBO, VAO, EBO;
 
-	glGenBuffers(2, VBOs.data());
-	glGenBuffers(2, EBOs.data());
-	glGenVertexArrays(2, VAOs.data());
-	//////////   quadrangle   ///////////
-	glBindVertexArray(VAOs[0]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+	glGenVertexArrays(1, &VAO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadrangle), quadrangle, GL_STATIC_DRAW);  // VBO
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);  // VBO
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // VAO
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 
-	/////////     rectangle    //////////
-	glBindVertexArray(VAOs[1]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rectangle), rectangle, GL_STATIC_DRAW);  // VBO
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // VAO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindVertexArray(0);
-	return { VAOs, VBOs, EBOs };
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	return { VAO, VBO, EBO };
 }
 
-void render(unsigned int shaderProgram, std::array<unsigned int, 2> VAOs)
+void render(unsigned int shaderProgram, unsigned int VAO)
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(shaderProgram);
-	glBindVertexArray(VAOs[0]);
+	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(VAOs[1]);
+	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
@@ -190,20 +172,20 @@ int main()
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	unsigned int shaderProgram = build_shader_program();
-	auto [VAOs, VBOs, EBOs] = get_VAO_VBO_EBO();
+	auto [VAO, VBO, EBO] = get_VAO_VBO_EBO();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		process_input(window);
 
-		render(shaderProgram, VAOs);
+		render(shaderProgram, VAO);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	glDeleteVertexArrays(2, VAOs.data());
-	glDeleteBuffers(2, VBOs.data());
-	glDeleteBuffers(2, EBOs.data());
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	glDeleteProgram(shaderProgram);
 
 	glfwTerminate();
