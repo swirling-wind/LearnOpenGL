@@ -59,8 +59,7 @@ unsigned int check_then_link_shaders(unsigned int vertexShader, unsigned int fra
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
+	unsigned int shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 	glLinkProgram(shaderProgram);
@@ -80,6 +79,7 @@ unsigned int check_then_link_shaders(unsigned int vertexShader, unsigned int fra
 
 unsigned int build_shader_program()
 {
+	unsigned int vertexShader, fragmentShader;
 	// Vertex Shader
 	const char* vertexShaderSource = R"(
 		#version 330 core
@@ -91,7 +91,6 @@ unsigned int build_shader_program()
 			ourColor = aColor;
 		}
 	)";
-	unsigned int vertexShader;
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
@@ -106,7 +105,6 @@ unsigned int build_shader_program()
 			FragColor = vec4(ourColor, 1.0);
 		}
 	)";
-	unsigned int fragmentShader;
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
@@ -121,12 +119,12 @@ std::tuple<unsigned int, unsigned int, unsigned int> get_VAO_VBO_EBO()
 		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
 		0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,
 		-0.45f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,
-		//0.45f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
+		0.45f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
 	};
 
 	unsigned int indices[] = {
 		0,1,2,
-		//1,2,3
+		1,2,3
 	};
 
 	unsigned int VBO, VAO, EBO;
@@ -138,7 +136,6 @@ std::tuple<unsigned int, unsigned int, unsigned int> get_VAO_VBO_EBO()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
@@ -159,8 +156,8 @@ void render(unsigned int shaderProgram, unsigned int VAO)
 
 	glUseProgram(shaderProgram);
 
-	float timeValue = glfwGetTime();
-	float greenValue = static_cast<float>((sin(timeValue) / 2.0) + 0.5);
+	float timeValue = static_cast<float>(glfwGetTime());
+	float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 	int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
 	glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
@@ -182,8 +179,7 @@ int main()
 	check_load_glad(window);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	//int nrAttributes;
-	//glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	//int nrAttributes;  glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	//std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
 
 	unsigned int shaderProgram = build_shader_program();
