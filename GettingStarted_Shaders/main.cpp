@@ -83,14 +83,25 @@ unsigned int build_shader_program()
 	// Vertex Shader
 	const char* vertexShaderSource = R"(
 		#version 330 core
+		uniform vec3 xyOffset;
+		uniform vec3 colors;
 		layout (location = 0) in vec3 aPos;
-		layout (location = 1) in vec3 aColor;
+		layout (location = 4) in vec3 aColor;
 		out vec3 ourColor;
+
 		void main() {
-			gl_Position = vec4(aPos, 1.0);
-			ourColor = aColor;
+			gl_Position = vec4(aPos + xyOffset, 1.0);
+			
+			if (aColor.x > 0.99f) {
+				ourColor = colors;
+			} else if (aColor.y > 0.99f) {
+				ourColor = vec3(colors.z, colors.xy);
+			} else {
+				ourColor = vec3(colors.yz, colors.x);
+			}
+			
 		}
-	)";
+	)";  // "gl_Position = vec4(-aPos, 1.0);" to invert all vertex
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
@@ -119,30 +130,30 @@ std::tuple<unsigned int, unsigned int, unsigned int> get_VAO_VBO_EBO()
 		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
 		0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,
 		-0.45f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,
-		0.45f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
+		0.45f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f
 	};
 
 	unsigned int indices[] = {
-		0,1,2,
-		1,2,3
+		3, 2, 0,
+		2, 3, 1
 	};
 
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
-	
+
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float))); // VAO
-	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(4);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -153,13 +164,33 @@ void render(unsigned int shaderProgram, unsigned int VAO)
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	glUseProgram(shaderProgram);
 
 	float timeValue = static_cast<float>(glfwGetTime());
-	float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-	int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-	glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+	int xyOffsetID = glGetUniformLocation(shaderProgram, "xyOffset");
+	glUniform3f(xyOffsetID, cos(timeValue) / 2.0f, sin(timeValue) / 2.0f, 0.0f);
+
+	int colorOffsetID = glGetUniformLocation(shaderProgram, "colors");
+	float red, green, blue;
+	float acceleration = timeValue * 4;
+	int pos = static_cast<int>(acceleration) % 3;
+	float intensity = acceleration - static_cast<int>(acceleration);
+	if (pos == 0) {
+		red = 0.0f;
+		green = 1.0f - intensity;
+		blue = intensity;
+	}
+	else if (pos == 1) {
+		red = intensity;
+		green = 0.0f;
+		blue = 1.0f - intensity;
+	}
+	else {
+		red = 1.0f - intensity;
+		green = intensity;
+		blue = 0.0f;
+	}
+	glUniform3f(colorOffsetID, red, green, blue);
 
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -170,6 +201,7 @@ void render(unsigned int shaderProgram, unsigned int VAO)
 
 int main()
 {
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
