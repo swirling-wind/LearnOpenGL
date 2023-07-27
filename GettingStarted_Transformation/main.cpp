@@ -1,10 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <iostream>
-#include <filesystem>
 
 void ProcessInput(GLFWwindow* window)
 {
@@ -73,21 +71,19 @@ unsigned int LinkToShaderProgram(unsigned int vertex_shader, unsigned int fragme
 	return shader_program;
 }
 
+
 unsigned int BuildShaderProgram()
 {
 	unsigned int vertex_shader, fragment_shader;
 	const char* vertex_shader_script = R"(
 		#version 330 core
 		layout (location = 0) in vec3 orig_pos;
-		layout (location = 1) in vec3 orig_color;
-		layout (location = 2) in vec2 orig_tex_coord;
+		layout (location = 4) in vec3 orig_color;
 		out vec3 inter_color;
-		out vec2 inter_tex_coord;
 
 		void main() {
 			gl_Position = vec4(orig_pos, 1.0);
 			inter_color = orig_color;
-			inter_tex_coord = orig_tex_coord;
 		}
 	)";
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -97,16 +93,10 @@ unsigned int BuildShaderProgram()
 	const char* fragment_shader_script = R"(
 		#version 330 core
 		out vec4 frag_color;
-		uniform float transparency;
 		in vec3 inter_color;
-		in vec2 inter_tex_coord;
-
-		uniform sampler2D orig_texture_0;
-		uniform sampler2D orig_texture_1;
 
 		void main() {
-			frag_color = mix(texture(orig_texture_0, inter_tex_coord), 
-							texture(orig_texture_1, vec2(-inter_tex_coord.x, inter_tex_coord.y) ), transparency);
+			frag_color = vec4(inter_color, 1.0);
 		}
 	)";
 	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -118,11 +108,11 @@ unsigned int BuildShaderProgram()
 std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboEbo()
 {
 	float vertices[] = {
-		// Position				// Color			// Texture Coord
-		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
-		0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
-		-0.5f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	2.0f, 2.0f,
-		0.5f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f,
+		// Position				// Color
+		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,
+		0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,
+		-0.5f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,
+		1.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f
 	};
 
 	unsigned int indices[] = {
@@ -142,92 +132,27 @@ std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboEbo()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		(void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		(void*)(4 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		(void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(4);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	return { vao, vbo, ebo };
 }
 
-void Render(unsigned int shader_program, unsigned int vao, std::tuple<unsigned int, unsigned int> textures)
+void Render(unsigned int shader_program, unsigned int vao)
 {
-	auto [texture_id_0, texture_id_1] = textures;
-
 	glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	int transparency_id = glGetUniformLocation(shader_program, "transparency");
-	float time_value = static_cast<float>(glfwGetTime());
-	glUniform1f(transparency_id, -cos(time_value) / 2.0f + 0.5f);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_id_0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_id_1);
-
 	glUseProgram(shader_program);
+
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	//glBindVertexArray(vao);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
-}
-
-std::tuple<unsigned int, unsigned int> LoadTexture()
-{
-	unsigned int texture_id_0, texture_id_1;
-	stbi_set_flip_vertically_on_load(true);
-	int width, height, channel_num_per_pixel;
-	glGenTextures(1, &texture_id_0);
-	glBindTexture(GL_TEXTURE_2D, texture_id_0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	unsigned char* container_texture = stbi_load("container.jpg",
-		&width, &height, &channel_num_per_pixel, 0);
-	if (container_texture != nullptr)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, container_texture);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture container" << std::endl;
-	}
-
-	width = 0; height = 0; channel_num_per_pixel = 0;
-	glGenTextures(1, &texture_id_1);
-	glBindTexture(GL_TEXTURE_2D, texture_id_1);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	unsigned char* face_texture = stbi_load("awesomeface.png",
-		&width, &height, &channel_num_per_pixel, 0);
-	if (face_texture != nullptr)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, face_texture);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture face" << std::endl;
-	}
-	stbi_image_free(container_texture);
-	stbi_image_free(face_texture);
-	return { texture_id_0, texture_id_1 };
 }
 
 int main()
@@ -242,17 +167,12 @@ int main()
 
 	unsigned int shader_program = BuildShaderProgram();
 	auto [vao, vbo, ebo] = GetVaoVboEbo();
-	auto textures_id = LoadTexture();
-
-	glUseProgram(shader_program);
-	glUniform1i(glGetUniformLocation(shader_program, "orig_texture_0"), 0);
-	glUniform1i(glGetUniformLocation(shader_program, "orig_texture_1"), 1);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		ProcessInput(window);
 
-		Render(shader_program, vao, textures_id);
+		Render(shader_program, vao);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
