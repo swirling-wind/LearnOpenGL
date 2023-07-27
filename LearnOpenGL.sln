@@ -7,7 +7,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GettingStarted_HelloTriangl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GettingStarted_Shaders", "GettingStarted_Shaders\GettingStarted_Shaders.vcxproj", "{FB07662E-7980-443C-9E59-6322CC027299}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shaders", "Shaders\Shaders.vcxproj", "{822784E8-14B0-4967-B0DE-F641D0E7B8D3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GettingStarted_LoadShaders", "Shaders\Shaders.vcxproj", "{822784E8-14B0-4967-B0DE-F641D0E7B8D3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GettingStarted_Textures", "GettingStarted_Textures\GettingStarted_Textures.vcxproj", "{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +43,14 @@ Global
 		{822784E8-14B0-4967-B0DE-F641D0E7B8D3}.Release|x64.Build.0 = Release|x64
 		{822784E8-14B0-4967-B0DE-F641D0E7B8D3}.Release|x86.ActiveCfg = Release|Win32
 		{822784E8-14B0-4967-B0DE-F641D0E7B8D3}.Release|x86.Build.0 = Release|Win32
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Debug|x64.ActiveCfg = Debug|x64
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Debug|x64.Build.0 = Debug|x64
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Debug|x86.ActiveCfg = Debug|Win32
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Debug|x86.Build.0 = Debug|Win32
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Release|x64.ActiveCfg = Release|x64
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Release|x64.Build.0 = Release|x64
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Release|x86.ActiveCfg = Release|Win32
+		{DB53C975-D8C8-4C4A-AA22-72ED2DB85538}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
