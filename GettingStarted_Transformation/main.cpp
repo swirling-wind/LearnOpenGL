@@ -93,8 +93,8 @@ unsigned int BuildShaderProgram()
 		uniform mat4 transform;
 
 		void main() {
-			gl_Position = vec4(orig_pos, 1.0);
-			inter_tex_coord = orig_tex_coord;
+			gl_Position = transform * vec4(orig_pos, 1.0);
+			inter_tex_coord = vec2(orig_tex_coord.x, 1.0 - orig_tex_coord.y);
 		}
 	)";
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -132,6 +132,8 @@ std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboEbo()
 	unsigned int indices[] = {
 		0, 1, 2,
 		1, 2, 3,
+		0, 1, 2,
+		1, 2, 3,
 	};
 	unsigned int vbo, vao, ebo;
 	glGenVertexArrays(1, &vao);
@@ -158,25 +160,35 @@ void Render(unsigned int shader_program, unsigned int vao, std::tuple<unsigned i
 	glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	//glm::mat4 trans;
-	//trans = glm::rotate(trans, (float)glfwGetTime(),
-	//	glm::vec3(0.0, 0.0, 1.0));
-	//trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+	glUseProgram(shader_program);
 
-	//unsigned int transform_location = glGetUniformLocation(shader_program, "transform");
-	//glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(trans));
 	auto [container_tex, face_tex] = textures;
+	float current_time = (float)glfwGetTime();
+	float magnitude = 0.6 - cos(current_time) / 3.0;
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, container_tex);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, face_tex);
 
-	glUseProgram(shader_program);
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+	trans = glm::rotate(trans, current_time, glm::vec3(0.0, 0.0, 1.0));
+	unsigned int transform_location = glGetUniformLocation(shader_program, "transform");
+	glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(trans));	
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+	trans = glm::scale(trans, glm::vec3(magnitude));
+	transform_location = glGetUniformLocation(shader_program, "transform");
+	glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(trans));
+	glBindVertexArray(vao);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 	glBindVertexArray(0);
 }
-
 
 std::tuple<unsigned int, unsigned int> LoadTexture(unsigned int shader_program)
 {
@@ -231,7 +243,7 @@ std::tuple<unsigned int, unsigned int> LoadTexture(unsigned int shader_program)
 }
 
 //	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-//	glm::mat4 trans = glm::mat4(1.0f);
+//	glm::mat4 trans = glm::mat4(1.0f); // glm::mat4(1.0f) !!
 //	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
 //	std::cout << trans << "\n\n";
 //	vec = trans * vec;
