@@ -276,15 +276,6 @@ int main()
 	auto textures_id = LoadTexture(shader_program);
 	while (!glfwWindowShouldClose(window))
 	{
-		model = glm::mat4(1.0f);
-		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(40.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-		int model_location = glGetUniformLocation(shader_program, "model");
-		glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model));
-		int view_location = glGetUniformLocation(shader_program, "view");
-		glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
-		int projection_location = glGetUniformLocation(shader_program, "projection");
-		glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
-
 		glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(shader_program);
@@ -296,9 +287,27 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, face_tex);
 
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+		int view_location = glGetUniformLocation(shader_program, "view");
+		glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
+		int projection_location = glGetUniformLocation(shader_program, "projection");
+		glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
+		int model_location = glGetUniformLocation(shader_program, "model");
+
+		for (int i = 0; i < 10; ++i)
+		{
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cube_positions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			if (i == 0 || (i + 1) % 3 == 0)
+			{
+				model = glm::rotate(model, (float)glfwGetTime() * 0.2f, glm::vec3(1.0f, 0.3f, 0.5f));
+			}
+			glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model));
+			
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 
 		ProcessInput(window);
