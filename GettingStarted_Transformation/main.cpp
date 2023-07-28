@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -16,7 +15,7 @@ std::ostream& operator<<(std::ostream& out, const glm::mat4& g)
 
 void ProcessInput(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
@@ -91,12 +90,10 @@ unsigned int BuildShaderProgram()
 		out vec2 inter_tex_coord;
 
 		uniform mat4 transform;
-
 		void main() {
 			gl_Position = transform * vec4(orig_pos, 1.0);
 			inter_tex_coord = vec2(orig_tex_coord.x, 1.0 - orig_tex_coord.y);
-		}
-	)";
+		})";
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex_shader, 1, &vertex_shader_script, NULL);
 	glCompileShader(vertex_shader);
@@ -108,12 +105,10 @@ unsigned int BuildShaderProgram()
 
 		uniform sampler2D face_tex;
 		uniform sampler2D container_tex;
-
 		void main() {
 			frag_color =mix(texture(face_tex, inter_tex_coord), 
 							texture(container_tex, inter_tex_coord), 0.5);
-		}
-	)";
+		})";
 	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment_shader, 1, &fragment_shader_script, NULL);
 	glCompileShader(fragment_shader);
@@ -159,12 +154,11 @@ void Render(unsigned int shader_program, unsigned int vao, std::tuple<unsigned i
 {
 	glClearColor(0.2f, 0.3f, 0.3f, 0.2f);
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	glUseProgram(shader_program);
 
-	auto [container_tex, face_tex] = textures;
+	const auto& [container_tex, face_tex] = textures;
 	float current_time = (float)glfwGetTime();
-	float magnitude = 0.6 - cos(current_time) / 3.0;
+	float magnitude = 0.6f - cos(current_time) / 3.0f;
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, container_tex);
@@ -242,12 +236,6 @@ std::tuple<unsigned int, unsigned int> LoadTexture(unsigned int shader_program)
 	return { container_tex, face_tex };
 }
 
-//	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-//	glm::mat4 trans = glm::mat4(1.0f); // glm::mat4(1.0f) !!
-//	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-//	std::cout << trans << "\n\n";
-//	vec = trans * vec;
-
 int main()
 {
 	glfwInit();
@@ -257,17 +245,14 @@ int main()
 	//glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GL_TRUE);
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	CheckAndLoadGlad(window);
-
-	unsigned int shader_program = BuildShaderProgram();
+	const unsigned int shader_program = BuildShaderProgram();
 	auto [vao, vbo, ebo] = GetVaoVboEbo();
 	auto textures_id = LoadTexture(shader_program);
-
 	while (!glfwWindowShouldClose(window))
 	{
-		ProcessInput(window);
-
 		Render(shader_program, vao, textures_id);
 
+		ProcessInput(window);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -276,6 +261,5 @@ int main()
 	glDeleteBuffers(1, &ebo);
 	glDeleteProgram(shader_program);
 	glfwTerminate();
-
 	return 0;
 }
