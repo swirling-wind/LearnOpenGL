@@ -120,9 +120,9 @@ std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboEbo()
 	float vertices[] = {
 		// Position				// Color			// Texture Coord
 		-0.5f, -0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
-		0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
-		-0.5f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	2.0f, 2.0f,
-		0.5f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f,
+		0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	2.0f, 0.0f,
+		-0.5f, 0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 2.0f,
+		0.5f, 0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	2.0f, 2.0f,
 	};
 
 	unsigned int indices[] = {
@@ -181,7 +181,7 @@ void Render(unsigned int shader_program, unsigned int vao, std::tuple<unsigned i
 	glBindVertexArray(0);
 }
 
-std::tuple<unsigned int, unsigned int> LoadTexture()
+std::tuple<unsigned int, unsigned int> LoadTexture(unsigned int shader_program)
 {
 	unsigned int texture_id_0, texture_id_1;
 	stbi_set_flip_vertically_on_load(true);
@@ -227,6 +227,9 @@ std::tuple<unsigned int, unsigned int> LoadTexture()
 	}
 	stbi_image_free(container_texture);
 	stbi_image_free(face_texture);
+	glUseProgram(shader_program);
+	glUniform1i(glGetUniformLocation(shader_program, "orig_texture_0"), 0);
+	glUniform1i(glGetUniformLocation(shader_program, "orig_texture_1"), 1);
 	return { texture_id_0, texture_id_1 };
 }
 
@@ -242,11 +245,7 @@ int main()
 
 	unsigned int shader_program = BuildShaderProgram();
 	auto [vao, vbo, ebo] = GetVaoVboEbo();
-	auto textures_id = LoadTexture();
-
-	glUseProgram(shader_program);
-	glUniform1i(glGetUniformLocation(shader_program, "orig_texture_0"), 0);
-	glUniform1i(glGetUniformLocation(shader_program, "orig_texture_1"), 1);
+	auto textures_id = LoadTexture(shader_program);
 
 	while (!glfwWindowShouldClose(window))
 	{

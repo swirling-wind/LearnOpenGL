@@ -1,6 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <stb_image.h>
 #include <iostream>
 
@@ -70,7 +74,6 @@ unsigned int LinkToShaderProgram(unsigned int vertex_shader, unsigned int fragme
 	glDeleteShader(fragment_shader);
 	return shader_program;
 }
-
 
 unsigned int BuildShaderProgram()
 {
@@ -157,6 +160,15 @@ void Render(unsigned int shader_program, unsigned int vao)
 
 int main()
 {
+	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+	vec = trans * vec;
+	std::cout << vec.x << vec.y << vec.z << std::endl;
+}
+
+int main1()
+{
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -182,4 +194,6 @@ int main()
 	glDeleteBuffers(1, &ebo);
 	glDeleteProgram(shader_program);
 	glfwTerminate();
+
+	return 0;
 }
