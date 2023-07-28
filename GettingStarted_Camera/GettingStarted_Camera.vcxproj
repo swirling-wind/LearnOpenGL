@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{e06c0e97-43c4-4f04-81c0-87c0b536be76}</ProjectGuid>
-    <RootNamespace>GettingStarted_CoordinateSystems</RootNamespace>
+    <ProjectGuid>{25ab22c3-05e6-45d8-b10f-9e1dc58e99aa}</ProjectGuid>
+    <RootNamespace>GettingStarted_Camera</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
