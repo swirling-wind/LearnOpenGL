@@ -8,6 +8,11 @@
 #include <stb_image.h>
 #include <iostream>
 
+std::ostream& operator<<(std::ostream& out, const glm::vec3& g)
+{
+	return out << glm::to_string(g);
+}
+
 std::ostream& operator<<(std::ostream& out, const glm::mat4& g)
 {
 	return out << glm::to_string(g);
@@ -265,12 +270,29 @@ int main()
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
+	glm::mat4 model_matrix = glm::mat4(1.0f);
+	glm::mat4 view_matrix = glm::mat4(1.0f);
+	view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 projection_matrix = glm::mat4(1.0f);
+	projection_matrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-	glm::mat4 model = glm::mat4(1.0f);
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	auto camera_position = glm::vec3(1.0f, 2.0f, 3.0f);
+	auto camera_target = glm::vec3(0.0f, 0.0f, 0.0f); 
+	auto world_up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 camera_direction_vec = glm::normalize(camera_position - camera_target);
+	glm::vec3 camera_right_vec = glm::normalize(glm::cross(world_up, camera_direction_vec));
+	glm::vec3 camera_up_vec = glm::cross(camera_direction_vec, camera_right_vec);
+
+	glm::mat4 inverse_camera_pos = glm::translate(glm::mat4(1.0f), -camera_position);
+	std::cout << inverse_camera_pos << "\n==============\n";
+
+	std::cout << glm::vec4(camera_right_vec, 0.0f) * inverse_camera_pos << "\n\n";
+	std::cout << glm::vec4(camera_up_vec, 0.0f) * inverse_camera_pos << "\n\n";
+	std::cout << glm::vec4(camera_direction_vec, 0.0f) * inverse_camera_pos << "\n\n";
+
+	glm::mat4 view = glm::lookAt(camera_position, camera_target, world_up);
+	std::cout << view;
+	return 0;
 
 	auto [vao, vbo, ebo] = GetVaoVboEbo();
 	auto textures_id = LoadTexture(shader_program);
@@ -289,22 +311,22 @@ int main()
 		glBindVertexArray(vao);
 
 		int view_location = glGetUniformLocation(shader_program, "view");
-		glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(view_location, 1, GL_FALSE, glm::value_ptr(view_matrix));
 		int projection_location = glGetUniformLocation(shader_program, "projection");
-		glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(projection_location, 1, GL_FALSE, glm::value_ptr(projection_matrix));
 		int model_location = glGetUniformLocation(shader_program, "model");
 
 		for (int i = 0; i < 10; ++i)
 		{
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, cube_positions[i]);
+			model_matrix = glm::mat4(1.0f);
+			model_matrix = glm::translate(model_matrix, cube_positions[i]);
 			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			model_matrix = glm::rotate(model_matrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			if (i == 0 || (i + 1) % 3 == 0)
 			{
-				model = glm::rotate(model, (float)glfwGetTime() * 0.2f, glm::vec3(1.0f, 0.3f, 0.5f));
+				model_matrix = glm::rotate(model_matrix, (float)glfwGetTime() * 0.2f, glm::vec3(1.0f, 0.3f, 0.5f));
 			}
-			glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model_matrix));
 			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
