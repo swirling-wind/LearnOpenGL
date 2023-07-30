@@ -10,96 +10,6 @@
 #include <array>
 #include <init_camera.h>
 
-Camera camera = Camera{ glm::vec3(0.0f, 0.0f, 3.0f) };
-
-float x_last_time = 800.0f / 2.0f, y_last_time = 600.0f / 2.0f;
-bool is_front_locked = true;
-
-std::ostream& operator<<(std::ostream& out, const glm::vec3& g)
-{
-	return out << glm::to_string(g);
-}
-
-std::ostream& operator<<(std::ostream& out, const glm::mat4& g)
-{
-	return out << glm::to_string(g);
-}
-
-void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
-{
-	camera.ProcessMouseScroll(y_offset);
-}
-
-void KeyboardCallback(GLFWwindow* window, const float delta_time_between_frames)
-{
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		is_front_locked = !is_front_locked;
-	}
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
-	}
-	float camera_speed = 2.0f * delta_time_between_frames;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::kForward, camera_speed);
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::kBackward, camera_speed);
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::kLeft, camera_speed);
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::kRight, camera_speed);
-	}
-}
-
-void FramebufferSizeCallback(GLFWwindow*, int width, int height)
-{
-	glViewport(0, 0, width, height);
-}
-
-void MouseCallback(GLFWwindow* window, double in_x_pos, double in_y_pos)
-{
-	float x_pos = static_cast<float>(in_x_pos);
-	float y_pos = static_cast<float>(in_y_pos);
-
-	float x_offset = x_pos - x_last_time;
-	float y_offset = y_last_time - y_pos; // reversed since y-coordinates go from bottom to top
-	x_last_time = x_pos;
-	y_last_time = y_pos;
-	if (!is_front_locked)
-	{
-		camera.ProcessMouseMovement(x_offset, y_offset);
-	}
-}
-
-void SetCallbackAndLoadGlad(GLFWwindow* window)
-{
-
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window" << std::endl;
-		glfwTerminate();
-		std::exit(EXIT_FAILURE);
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-	glfwSetCursorPosCallback(window, MouseCallback);
-	glfwSetScrollCallback(window, ScrollCallback);
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		std::exit(EXIT_FAILURE);
-	}
-	glEnable(GL_DEPTH_TEST);
-}
-
 unsigned int LinkToShaderProgram(unsigned int vertex_shader, unsigned int fragment_shader)
 {
 	int success = 1;
@@ -254,7 +164,6 @@ std::tuple<unsigned int, unsigned int> LoadTexture(unsigned int shader_program)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
 	unsigned char* container_data = stbi_load("container.jpg",
 		&width, &height, &channel_num_per_pixel, 0);
 	if (container_data != nullptr)
