@@ -26,13 +26,10 @@
     <ClInclude Include="..\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\load_shaders.h">
+    <ClInclude Include="init_camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\init_camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\init_shaders.h">
+    <ClInclude Include="init_shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

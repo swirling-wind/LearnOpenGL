@@ -9,7 +9,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
-std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboEbo()
+std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboAndLightVao()
 {
 	float vertices[] = {
 		// Position				// Texture Coordinates
@@ -55,19 +55,22 @@ std::tuple<unsigned int, unsigned int, unsigned int> GetVaoVboEbo()
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-	unsigned int indices[] = {
-		0, 1, 2,
-		1, 2, 3,
-	};
-	unsigned int vbo, vao, ebo;
-	glGenVertexArrays(1, &vao);	glGenBuffers(1, &vbo);	glGenBuffers(1, &ebo);
-	glBindVertexArray(vao);	glBindBuffer(GL_ARRAY_BUFFER, vbo);	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	unsigned int vbo, vao, light_vao;
+	glGenVertexArrays(1, &vao);	glGenBuffers(1, &vbo);	glGenVertexArrays(1, &light_vao);
+
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);	
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(light_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	glBindVertexArray(0);
-	return { vao, vbo, ebo };
+	return { vao, vbo, light_vao };
 }
 
 std::tuple<unsigned int, unsigned int> LoadTexture(unsigned int shader_program)
