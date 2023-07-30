@@ -32,6 +32,9 @@
     <ClInclude Include="..\init_camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\init_shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="awesomeface.png">

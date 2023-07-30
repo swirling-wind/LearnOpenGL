@@ -195,7 +195,4 @@ void SetCallbackAndLoadGlad(GLFWwindow* window)
 	glEnable(GL_DEPTH_TEST);
 }
 
-
-
-
-#endif
+#endif // !INIT_CAMERA_H

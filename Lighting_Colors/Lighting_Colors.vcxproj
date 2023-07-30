@@ -145,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\init_camera.h" />
+    <ClInclude Include="..\init_shaders.h" />
     <ClInclude Include="..\load_shaders.h" />
     <ClInclude Include="..\stb_image.h" />
   </ItemGroup>
