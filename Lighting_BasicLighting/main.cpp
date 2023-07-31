@@ -22,14 +22,17 @@ unsigned int BuildObjShader()
 		out vec3 inter_normal;
 		out vec3 frag_pos;
 
+		
 		uniform mat4 model;
 		uniform mat4 view;
 		uniform mat4 projection;
 
 		void main() {
-			gl_Position = projection * view * model * vec4(orig_pos, 1.0);
 			frag_pos = vec3(model * vec4(orig_pos, 1.0));
-			inter_normal = orig_normal;	
+			inter_normal = mat3(transpose(inverse(model))) * orig_normal;
+			gl_Position = projection * view * vec4(frag_pos, 1.0);
+
+			
 		})";
 	glShaderSource(vertex_shader, 1, &vertex_shader_script, NULL);
 	const char* fragment_shader_script = R"(#version 330 core
@@ -39,6 +42,7 @@ unsigned int BuildObjShader()
 
 		out vec4 frag_color;
 
+		uniform vec3 view_pos;
 		uniform vec3 light_pos;
 		uniform vec3 object_color;
 		uniform vec3 light_color;
@@ -54,8 +58,15 @@ unsigned int BuildObjShader()
 			float diff_magnitude = max(dot(inter_normal, light_dir), 0.0);
 			vec3 diffuse = diff_magnitude * light_color;
 
-			vec3 result = (ambient + diffuse) * object_color;
-			frag_color = vec4((ambient + diffuse) * object_color, 1.0);
+			// specular
+			float specular_strength = 0.9f;
+			vec3 view_dir = normalize(view_pos - frag_pos);
+			vec3 reflect_dir = reflect(-light_dir, norm);
+			float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32);
+			vec3 specular = specular_strength * spec * light_color;
+
+			vec3 result = (ambient + diffuse + specular) * object_color;
+			frag_color = vec4(result, 1.0);
 		})";
 	glShaderSource(fragment_shader, 1, &fragment_shader_script, NULL);
 	return LinkToShaderProgram(vertex_shader, fragment_shader);
@@ -105,7 +116,7 @@ int main()
 
 	const glm::vec3 obj_color(1.0f, 0.5f, 0.31f);
 	const glm::vec3 light_color(1.0f, 1.0f, 1.0f);
-	const glm::vec3 light_pos(1.2f, 0.8f, 0.5f);
+	const glm::vec3 light_pos(-0.5f, 0.1f, -0.5f);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -115,19 +126,20 @@ int main()
 		delta_time_between_frames = current_frame_time - last_frame_time;
 		last_frame_time = current_frame_time;
 
+		glm::mat4 model_matrix = glm::mat4(1.0f);
 		const glm::mat4 view_matrix = camera.GetViewMatrix();
 		const glm::mat4 projection_matrix = glm::perspective(glm::radians(camera.zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// Obj Shader
-		glm::mat4 model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-0.8f, -0.8f, 0.0f));
+		model_matrix = glm::translate(model_matrix, glm::vec3(-0.8f, -0.8f, -0.5f));
 		glUseProgram(obj_shader_program);
 		glBindVertexArray(obj_vao);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "object_color"), 1, &obj_color[0]);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "light_color"), 1, &light_color[0]);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "light_pos"), 1, &light_pos[0]);
+		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
-		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Light Shader
@@ -135,9 +147,9 @@ int main()
 		model_matrix = glm::scale(model_matrix, glm::vec3(0.2f));
 		glUseProgram(light_shader_program);
 		glBindVertexArray(light_vao);
+		glUniformMatrix4fv(glGetUniformLocation(light_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(light_shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(light_shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
-		glUniformMatrix4fv(glGetUniformLocation(light_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
