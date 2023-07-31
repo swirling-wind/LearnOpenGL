@@ -123,6 +123,7 @@ RECENT REVISION HISTORY:
   80% of merge conflicts on stb PRs are due to people adding their name at the end
   of the credits.
 */
+#pragma warning(push, 0)
 
 #ifndef STBI_INCLUDE_STB_IMAGE_H
 #define STBI_INCLUDE_STB_IMAGE_H
@@ -7758,8 +7759,10 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
    return stbi__is_16_main(&s);
 }
 
-#endif // STB_IMAGE_IMPLEMENTATION
 
+
+#endif // STB_IMAGE_IMPLEMENTATION
+#pragma warning(pop)
 /*
    revision history:
       2.20  (2019-02-07) support utf8 filenames in Windows; fix warnings and platform ifdefs

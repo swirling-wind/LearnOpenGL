@@ -15,6 +15,7 @@
 
 namespace glm
 {
+#pragma warning(push, 0)
 	template<typename T, qualifier Q>
 	struct qua
 	{
@@ -179,6 +180,7 @@ namespace glm
 
 	template<typename T, qualifier Q>
 	GLM_FUNC_DECL GLM_CONSTEXPR bool operator!=(qua<T, Q> const& q1, qua<T, Q> const& q2);
+#pragma warning(pop)
 } //namespace glm
 
 #ifndef GLM_EXTERNAL_TEMPLATE

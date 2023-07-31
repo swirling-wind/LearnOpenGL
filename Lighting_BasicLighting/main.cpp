@@ -17,24 +17,35 @@ unsigned int BuildObjShader()
 	const char* vertex_shader_script = R"(
 		#version 330 core
 		layout (location = 0) in vec3 orig_pos;
+		layout (location = 1) in vec3 orig_normal;
 
 		uniform mat4 model;
 		uniform mat4 view;
 		uniform mat4 projection;
 
+		out vec3 inter_normal;
+		out vec3 frag_position;
+
 		void main() {
 			gl_Position = projection * view * model * vec4(orig_pos, 1.0);
+			inter_normal = orig_normal;	
+			frag_position = vec3(model * vec4(orig_pos, 1.0));
 		})";
 	glShaderSource(vertex_shader, 1, &vertex_shader_script, NULL);
 	const char* fragment_shader_script = R"(
 		#version 330 core
+		
+		in vec3 inter_normal;
 		out vec4 frag_color;
 
 		uniform vec3 object_color;
 		uniform vec3 light_color;
 
 		void main() {
-			frag_color = vec4(light_color * object_color, 1.0);
+			float ambient_strength = 0.1;
+			vec3 ambient = ambient_strength * light_color;
+
+			frag_color = vec4(ambient * object_color, 1.0);
 		})";
 	glShaderSource(fragment_shader, 1, &fragment_shader_script, NULL);
 	return LinkToShaderProgram(vertex_shader, fragment_shader);
@@ -42,7 +53,7 @@ unsigned int BuildObjShader()
 
 unsigned int BuildLightShader()
 {
-	unsigned int light_vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	unsigned int light_vertex_shader = glCreateShader(GL_VERTEX_SHADER), light_frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	const char* light_vertext_shader_script = R"(
 		#version 330 core
 		layout (location = 0) in vec3 aPos;
@@ -54,10 +65,9 @@ unsigned int BuildLightShader()
 		void main() {
 			gl_Position = projection * view * model * vec4(aPos, 1.0);
 		}
+
 	)";
 	glShaderSource(light_vertex_shader, 1, &light_vertext_shader_script, NULL);
-
-	unsigned int light_frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
 	const char* light_frag_shader_script = R"(
 		#version 330 core
 		out vec4 frag_color;
@@ -95,10 +105,11 @@ int main()
 		delta_time_between_frames = current_frame_time - last_frame_time;
 		last_frame_time = current_frame_time;
 
+		const glm::mat4 view_matrix = camera.GetViewMatrix();
+		const glm::mat4 projection_matrix = glm::perspective(glm::radians(camera.zoom), 800.0f / 600.0f, 0.1f, 100.0f);
+
 		// Obj Shader
 		glm::mat4 model_matrix = glm::mat4(1.0f);
-		glm::mat4 view_matrix = camera.GetViewMatrix();
-		glm::mat4 projection_matrix = glm::perspective(glm::radians(camera.zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 		glUseProgram(obj_shader_program);
 		glBindVertexArray(obj_vao);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "object_color"), 1, &obj_color[0]);
