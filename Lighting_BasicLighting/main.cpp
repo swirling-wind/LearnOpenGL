@@ -103,9 +103,9 @@ int main()
 	const auto [obj_vao, light_vao, vbo] = GetObjVaoLightVaoAndVbo();
 	float delta_time_between_frames = 0.0f, last_frame_time = 0.0f;
 
-	const glm::vec3 obj_color(1.0f, 0.5, 0.31f);
+	const glm::vec3 obj_color(1.0f, 0.5f, 0.31f);
 	const glm::vec3 light_color(1.0f, 1.0f, 1.0f);
-	const glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
+	const glm::vec3 light_pos(1.2f, 0.8f, 0.5f);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -119,7 +119,7 @@ int main()
 		const glm::mat4 projection_matrix = glm::perspective(glm::radians(camera.zoom), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// Obj Shader
-		glm::mat4 model_matrix = glm::mat4(1.0f);
+		glm::mat4 model_matrix = glm::translate(glm::mat4(1.0f), glm::vec3(-0.8f, -0.8f, 0.0f));
 		glUseProgram(obj_shader_program);
 		glBindVertexArray(obj_vao);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "object_color"), 1, &obj_color[0]);
@@ -131,8 +131,7 @@ int main()
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// Light Shader
-		model_matrix = glm::mat4(1.0f);
-		model_matrix = glm::translate(model_matrix, light_pos);
+		model_matrix = glm::translate(glm::mat4(1.0f), light_pos);
 		model_matrix = glm::scale(model_matrix, glm::vec3(0.2f));
 		glUseProgram(light_shader_program);
 		glBindVertexArray(light_vao);

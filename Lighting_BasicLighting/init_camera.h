@@ -1,10 +1,13 @@
 #ifndef INIT_CAMERA_H
 #define INIT_CAMERA_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-class Camera;
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <iostream>
 
 enum struct CameraMovement {
 	kForward,
@@ -23,7 +26,7 @@ public:
 	explicit Camera(
 		glm::vec3 position,
 		float yaw = -90.0f, float pitch = 0.0f)
-		: front_(glm::vec3(0.0f, 0.0f, -1.0f)), zoom(45.0f)
+		: front_(glm::vec3(0.0f, 0.0f, -1.0f)), zoom(60.0f)
 	{
 		position_ = position;
 		yaw_ = yaw;
