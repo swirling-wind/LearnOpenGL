@@ -37,6 +37,11 @@ public:
 		return glm::lookAt(position_, position_ + front_, up_);
 	}
 
+	glm::vec3 GetPosition()
+	{
+		return this->position_;
+	}
+
 	// processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
 	void ProcessKeyboard(const CameraMovement direction, const float delta_time)
 	{
@@ -56,8 +61,8 @@ public:
 	{
 		x_offset *= kMouseSensitivity;
 		y_offset *= kMouseSensitivity;
-		yaw_ += x_offset;
-		pitch_ += y_offset;
+		yaw_ += static_cast<float>(x_offset);
+		pitch_ += static_cast<float>(y_offset);
 
 		if (pitch_ > 89.0f)
 			pitch_ = 89.0f;
@@ -116,9 +121,9 @@ std::ostream& operator<<(std::ostream& out, const glm::mat4& g)
 	return out << glm::to_string(g);
 }
 
-void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
+void ScrollCallback(GLFWwindow*, double	, double y_offset)
 {
-	camera.ProcessMouseScroll(y_offset);
+	camera.ProcessMouseScroll(static_cast<float>(y_offset));
 }
 
 void KeyboardCallback(GLFWwindow* window, const float delta_time_between_frames)
@@ -159,7 +164,7 @@ void FramebufferSizeCallback(GLFWwindow*, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void MouseCallback(GLFWwindow* window, double in_x_pos, double in_y_pos)
+void MouseCallback(GLFWwindow*, double in_x_pos, double in_y_pos)
 {
 	float x_pos = static_cast<float>(in_x_pos);
 	float y_pos = static_cast<float>(in_y_pos);
