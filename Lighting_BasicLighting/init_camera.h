@@ -1,13 +1,10 @@
 #ifndef INIT_CAMERA_H
 #define INIT_CAMERA_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
-#include <iostream>
+
+class Camera;
 
 enum struct CameraMovement {
 	kForward,
@@ -26,7 +23,7 @@ public:
 	explicit Camera(
 		glm::vec3 position,
 		float yaw = -90.0f, float pitch = 0.0f)
-		: front_(glm::vec3(0.0f, 0.0f, -1.0f)), zoom(60.0f)
+		: front_(glm::vec3(0.0f, 0.0f, -1.0f)), zoom(45.0f)
 	{
 		position_ = position;
 		yaw_ = yaw;
@@ -38,6 +35,11 @@ public:
 	glm::mat4 GetViewMatrix()
 	{
 		return glm::lookAt(position_, position_ + front_, up_);
+	}
+
+	glm::vec3 GetPosition()
+	{
+		return this->position_;
 	}
 
 	// processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -59,8 +61,8 @@ public:
 	{
 		x_offset *= kMouseSensitivity;
 		y_offset *= kMouseSensitivity;
-		yaw_ += x_offset;
-		pitch_ += y_offset;
+		yaw_ += static_cast<float>(x_offset);
+		pitch_ += static_cast<float>(y_offset);
 
 		if (pitch_ > 89.0f)
 			pitch_ = 89.0f;
@@ -119,9 +121,9 @@ std::ostream& operator<<(std::ostream& out, const glm::mat4& g)
 	return out << glm::to_string(g);
 }
 
-void ScrollCallback(GLFWwindow* window, double x_offset, double y_offset)
+void ScrollCallback(GLFWwindow*, double	, double y_offset)
 {
-	camera.ProcessMouseScroll(y_offset);
+	camera.ProcessMouseScroll(static_cast<float>(y_offset));
 }
 
 void KeyboardCallback(GLFWwindow* window, const float delta_time_between_frames)
@@ -162,7 +164,7 @@ void FramebufferSizeCallback(GLFWwindow*, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void MouseCallback(GLFWwindow* window, double in_x_pos, double in_y_pos)
+void MouseCallback(GLFWwindow*, double in_x_pos, double in_y_pos)
 {
 	float x_pos = static_cast<float>(in_x_pos);
 	float y_pos = static_cast<float>(in_y_pos);
