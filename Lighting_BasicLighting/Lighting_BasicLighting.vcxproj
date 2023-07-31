@@ -147,8 +147,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\stb_image.h" />
-    <ClInclude Include="init_camera.h" />
-    <ClInclude Include="init_shaders.h" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="shaders.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
