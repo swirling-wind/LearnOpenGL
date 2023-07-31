@@ -14,38 +14,48 @@
 unsigned int BuildObjShader()
 {
 	unsigned int vertex_shader = glCreateShader(GL_VERTEX_SHADER), fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	const char* vertex_shader_script = R"(
-		#version 330 core
+	const char* vertex_shader_script = R"(#version 330 core
+
 		layout (location = 0) in vec3 orig_pos;
 		layout (location = 1) in vec3 orig_normal;
+
+		out vec3 inter_normal;
+		out vec3 frag_pos;
 
 		uniform mat4 model;
 		uniform mat4 view;
 		uniform mat4 projection;
 
-		out vec3 inter_normal;
-		out vec3 frag_position;
-
 		void main() {
 			gl_Position = projection * view * model * vec4(orig_pos, 1.0);
+			frag_pos = vec3(model * vec4(orig_pos, 1.0));
 			inter_normal = orig_normal;	
-			frag_position = vec3(model * vec4(orig_pos, 1.0));
 		})";
 	glShaderSource(vertex_shader, 1, &vertex_shader_script, NULL);
-	const char* fragment_shader_script = R"(
-		#version 330 core
-		
+	const char* fragment_shader_script = R"(#version 330 core
+
 		in vec3 inter_normal;
+		in vec3 frag_pos;
+
 		out vec4 frag_color;
 
+		uniform vec3 light_pos;
 		uniform vec3 object_color;
 		uniform vec3 light_color;
 
 		void main() {
+			// ambient
 			float ambient_strength = 0.1;
 			vec3 ambient = ambient_strength * light_color;
 
-			frag_color = vec4(ambient * object_color, 1.0);
+			// diffuse
+			vec3 norm = normalize(inter_normal);
+			vec3 light_dir = normalize(light_pos - frag_pos);
+			float diff_magnitude = max(dot(inter_normal, light_dir), 0.0);
+			vec3 diffuse = diff_magnitude * light_color;
+
+			vec3 result = (ambient + diffuse) * object_color;
+			frag_color = vec4((ambient + diffuse) * object_color, 1.0);
 		})";
 	glShaderSource(fragment_shader, 1, &fragment_shader_script, NULL);
 	return LinkToShaderProgram(vertex_shader, fragment_shader);
@@ -114,6 +124,7 @@ int main()
 		glBindVertexArray(obj_vao);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "object_color"), 1, &obj_color[0]);
 		glUniform3fv(glGetUniformLocation(obj_shader_program, "light_color"), 1, &light_color[0]);
+		glUniform3fv(glGetUniformLocation(obj_shader_program, "light_pos"), 1, &light_pos[0]);
 		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "view"), 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "projection"), 1, GL_FALSE, glm::value_ptr(projection_matrix));
 		glUniformMatrix4fv(glGetUniformLocation(obj_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -130,7 +141,7 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(light_shader_program, "model"), 1, GL_FALSE, glm::value_ptr(model_matrix));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		//glBindVertexArray(0);
+		glBindVertexArray(0);
 		KeyboardCallback(window, delta_time_between_frames);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
