@@ -40,5 +40,11 @@
     <Image Include="container2_specular.png">
       <Filter>Source Files</Filter>
     </Image>
+    <Image Include="lighting_maps_specular_color.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="matrix.jpg">
+      <Filter>Source Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
