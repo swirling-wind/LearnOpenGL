@@ -182,7 +182,6 @@ int main()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	unsigned int diffuseMap = loadTexture("container2.png");
 
 
 	// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
@@ -195,12 +194,19 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	// lighting
 	glm::vec3 lightPos(1.2f, 1.0f, 0.5f);
+
+	unsigned int diffuseMap = loadTexture("container2.png");
+	unsigned int specularMap = loadTexture("container2_specular.png");
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, diffuseMap);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, specularMap);
 
 	lightingShader.use();
 	lightingShader.setInt("material.diffuse", 0);
-
+	lightingShader.setInt("material.specular", 1);
+	
 	while (!glfwWindowShouldClose(window))
 	{
 		// per-frame time logic
@@ -217,13 +223,7 @@ int main()
 		// ------
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//glm::vec3 lightColor;
-		//lightColor.x = sin(glfwGetTime() * 1.0f) / 2.0f + 0.5f;
-		//lightColor.y = sin(glfwGetTime() * 0.3f) / 2.0f + 0.5f;
-		//lightColor.z = sin(glfwGetTime() * 0.6f) / 2.0f + 0.5f;
-		//glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-		//glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);		
+	
 		lightingShader.use();
 		lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
 		lightingShader.setFloat("material.shininess", 64.0f);
@@ -264,7 +264,6 @@ int main()
 
 		glBindVertexArray(lightCubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
