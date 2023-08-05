@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{20c2f8d3-1b4f-4d58-8285-c8b83f6f3b07}</ProjectGuid>
-    <RootNamespace>Lighting_LightingMaps</RootNamespace>
+    <ProjectGuid>{b0287ee7-44e8-4558-becb-a3c2663d1e07}</ProjectGuid>
+    <RootNamespace>Lighting_LightCaster</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
