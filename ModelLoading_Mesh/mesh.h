@@ -29,16 +29,18 @@ public:
     vector<unsigned int> indices;
     vector<Texture> textures;
 
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+    explicit Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures) 
+        : vertices(vertices), indices(indices), textures(textures)
     {
-        this->vertices = vertices;
-        this->indices = indices;
-        this->textures = textures;
-
         setupMesh();
     }
+    ~Mesh() = default;
+    Mesh(const Mesh& rhs) = delete; // not needed so far
+    Mesh& operator=(const Mesh& rhs) = delete;
+    Mesh& operator=(Mesh&& rhs) = delete;
 
-    void Draw(Shader shader)
+
+    void Draw(const Shader& shader)
 {
         /* Example code of shader
             uniform sampler2D texture_diffuse1;
