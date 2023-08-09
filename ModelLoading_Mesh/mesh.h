@@ -10,8 +10,6 @@
 
 #include <string>
 #include <vector>
-
-
 using std::string, std::vector;
 
 struct Vertex {
@@ -27,18 +25,53 @@ struct Texture {
 
 class Mesh {
 public:
-    /*  网格数据  */
     vector<Vertex> vertices;
     vector<unsigned int> indices;
     vector<Texture> textures;
-    /*  函数  */
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
-    void Draw(Shader shader);
+
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+    {
+        this->vertices = vertices;
+        this->indices = indices;
+        this->textures = textures;
+
+        setupMesh();
+    }
+
+    void Draw(Shader shader)
+{
+        /* Example code of shader
+            uniform sampler2D texture_diffuse1;
+            uniform sampler2D texture_diffuse2;
+            uniform sampler2D texture_diffuse3;
+            uniform sampler2D texture_specular1;
+            uniform sampler2D texture_specular2;*/
+        unsigned int diffuseNr = 1;
+        unsigned int specularNr = 1;
+        for (unsigned int i = 0; i < this->textures.size(); i++)
+        {
+            glActiveTexture(GL_TEXTURE0 + i);
+            
+            string number; // current texture indice
+            string name = textures[i].type;
+            if (name == "texture_diffuse")
+                number = std::to_string(diffuseNr++);
+            else if (name == "texture_specular")
+                number = std::to_string(specularNr++);
+
+            shader.setInt(("material." + name + number).c_str(), i);
+            glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        }
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 
 private:
-    /*  渲染数据  */
     unsigned int VAO, VBO, EBO;
-    /*  函数  */
+
     void setupMesh()
     {
         glGenVertexArrays(1, &VAO);
@@ -61,15 +94,6 @@ private:
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
         glBindVertexArray(0);
-    }
-
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
-    {
-        this->vertices = vertices;
-        this->indices = indices;
-        this->textures = textures;
-
-        setupMesh();
     }
 };
 
