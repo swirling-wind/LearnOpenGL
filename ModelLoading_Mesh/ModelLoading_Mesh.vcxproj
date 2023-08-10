@@ -72,12 +72,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\yaozi\Desktop\CPP\LearnOpenGL;C:\Libraries\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Libraries\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\yaozi\Desktop\CPP\assimp\include;C:\Users\yaozi\Desktop\CPP\LearnOpenGL;C:\Libraries\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\yaozi\Desktop\CPP\assimp\lib\Debug;C:\Libraries\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\yaozi\Desktop\CPP\LearnOpenGL;C:\Libraries\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Libraries\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\yaozi\Desktop\CPP\assimp\include;C:\Users\yaozi\Desktop\CPP\LearnOpenGL;C:\Libraries\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\yaozi\Desktop\CPP\assimp\lib\Debug;C:\Libraries\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -113,7 +113,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
