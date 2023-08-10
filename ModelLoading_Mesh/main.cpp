@@ -17,9 +17,9 @@ using std::string, std::vector, glm::vec3, glm::vec2;
 
 int main()
 {
-	Vertex test_vertex = Vertex{ vec3(1,2,3), vec3(2,3,4), vec2(3,4)};
-	Texture test_texture = Texture{0u, "Hello"};
-	Mesh mesh = Mesh{ vector{test_vertex}, vector{2u,3u}, vector{test_texture} };
 
-	std::cout << "PREPARE" << std::endl;
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile("path", aiProcess_Triangulate | aiProcess_FlipUVs);
+
+
 }
