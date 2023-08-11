@@ -3,16 +3,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 #include "mesh.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
-using std::string, std::vector, glm::vec3, glm::vec2;
+using std::string, std::cout, std::endl, std::vector, glm::vec3, glm::vec2;
 
 
 int main()
